@@ -102,7 +102,7 @@ Redis 和 PostgreSQL 的主机端口仅绑定 `127.0.0.1`，容器之间仍使�
 # 🚀 一键启动
 
 ```bash
-git clone https://github.com/ywx920/local-ai-osint-dashboard.git osint-system
+git clone https://github.com/ywx920/osint-local-ai-dashboard.git osint-system
 cd osint-system
 
 cp -n .env.example .env
@@ -237,7 +237,7 @@ time.sleep(60)
 
 ```bash
 ssh-keygen -t ed25519
-git remote set-url origin git@github.com:ywx920/local-ai-osint-dashboard.git
+git remote set-url origin git@github.com:ywx920/osint-local-ai-dashboard.git
 git push
 ```
 
