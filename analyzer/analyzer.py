@@ -33,7 +33,7 @@ cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS ai_impact TEXT")
 cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS ai_action TEXT")
 cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS risk_level TEXT")
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://192.168.31.11:11434/api/generate")
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://host.docker.internal:11434/api/generate")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
 
 KEYWORDS = {

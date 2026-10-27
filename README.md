@@ -74,11 +74,38 @@ Docker Compose
 
 ---
 
+# 数据库密码配置
+
+仓库不保存数据库密码。首次启动前，在项目目录创建本地配置：
+
+```bash
+cp -n .env.example .env
+chmod 600 .env
+nano .env
+```
+
+将 `POSTGRES_PASSWORD` 设置为新生成的强密码，再执行下方 Docker Compose 命令。
+`.env` 已加入忽略规则，不要提交；`.env.example` 仅保留空密码占位。
+Compose 使用 `POSTGRES_PASSWORD` 配置数据库，并把相同值以 `PG_PASSWORD` 注入 API 和 analyzer。
+直接运行 API 时必须设置 `PG_PASSWORD` 环境变量。
+Ollama 地址可通过 `.env` 中的 `OLLAMA_URL` 配置，默认使用 Docker 主机地址。
+
+已有数据库的数据卷不会因为修改 `.env` 自动更换密码。
+请先备份数据库，用 `docker compose exec postgres psql -U osint -d osintdb`
+进入数据库，再用交互命令 `\password osint` 设置新密码，
+同步更新 `.env` 后重建 API 和 analyzer 容器。
+不要为更换密码删除数据卷。过去公开过的密码应更换，即使已从当前文件移除。
+Redis 和 PostgreSQL 的主机端口仍按原配置映射，请按实际访问需求限制网络访问。
+
 # 🚀 一键启动
 
 ```bash
 git clone https://github.com/ywx920/osint-system.git
 cd osint-system
+
+cp -n .env.example .env
+chmod 600 .env
+nano .env  # 设置 POSTGRES_PASSWORD 后继续
 
 sudo docker compose build
 sudo docker compose up -d

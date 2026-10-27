@@ -25,6 +25,8 @@ services:
     restart: always
     ports:
       - "7000:7000"
+    environment:
+      PG_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in environment or .env}
     depends_on:
       - postgres
 
@@ -40,7 +42,7 @@ services:
       PG_USER: osint
       PG_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in environment or .env}
       PG_DB: osintdb
-      OLLAMA_URL: http://192.168.31.11:11434/api/generate
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434/api/generate}
       OLLAMA_MODEL: qwen2.5:7b
     depends_on:
       - redis

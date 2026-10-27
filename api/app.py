@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import psycopg2, time
+import os, psycopg2, time
 from collections import Counter
 
 app = FastAPI()
@@ -9,7 +9,7 @@ def conn():
     return psycopg2.connect(
         host="postgres",
         user="osint",
-        password="osint123",
+        password=os.environ["PG_PASSWORD"],
         dbname="osintdb"
     )
 

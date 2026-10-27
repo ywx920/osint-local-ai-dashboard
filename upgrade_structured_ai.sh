@@ -48,7 +48,7 @@ cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS ai_impact TEXT")
 cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS ai_action TEXT")
 cur.execute("ALTER TABLE news ADD COLUMN IF NOT EXISTS risk_level TEXT")
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://192.168.31.11:11434/api/generate")
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://host.docker.internal:11434/api/generate")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
 
 KEYWORDS = {
@@ -225,7 +225,7 @@ echo "========== 3. 升级 API 页面 =========="
 cat > $BASE/api/app.py <<'PY'
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import psycopg2, time
+import os, psycopg2, time
 from collections import Counter
 
 app = FastAPI()
@@ -234,7 +234,7 @@ def conn():
     return psycopg2.connect(
         host="postgres",
         user="osint",
-        password="osint123",
+        password=os.environ["PG_PASSWORD"],
         dbname="osintdb"
     )
 
