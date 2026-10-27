@@ -95,12 +95,14 @@ Ollama 地址可通过 `.env` 中的 `OLLAMA_URL` 配置，默认使用 Docker �
 进入数据库，再用交互命令 `\password osint` 设置新密码，
 同步更新 `.env` 后重建 API 和 analyzer 容器。
 不要为更换密码删除数据卷。过去公开过的密码应更换，即使已从当前文件移除。
-Redis 和 PostgreSQL 的主机端口仍按原配置映射，请按实际访问需求限制网络访问。
+Redis 和 PostgreSQL 的主机端口仅绑定 `127.0.0.1`，容器之间仍使用服务名通信。
+页面默认只允许本机访问 `http://127.0.0.1:7000`。需要远程访问时，优先使用 SSH 隧道或带认证的 HTTPS 反向代理。
+确需在受控网络直接监听时，可在 `.env` 显式设置 `OSINT_BIND_ADDRESS`；此页面没有内置登录验证，不应直接暴露到公网。
 
 # 🚀 一键启动
 
 ```bash
-git clone https://github.com/ywx920/osint-system.git
+git clone https://github.com/ywx920/local-ai-osint-dashboard.git osint-system
 cd osint-system
 
 cp -n .env.example .env
@@ -116,7 +118,7 @@ sudo docker compose up -d
 # 🌐 访问系统
 
 ```text
-http://你的IP:7000
+http://127.0.0.1:7000
 ```
 
 ---
@@ -153,11 +155,12 @@ ollama pull qwen2.5:7b
 sudo systemctl edit ollama
 ```
 
-写入：
+若仅在主机直接调用，保留 Ollama 的本机监听即可。容器需要访问主机服务时，使用明确的受控接口并限制来源到 Docker 网络；不要把无认证的 Ollama 接口直接公开到公网。
+将下方占位符替换为实际受控接口地址后写入：
 
 ```ini
 [Service]
-Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_HOST=<Docker 可访问的受控接口地址>:11434"
 ```
 
 应用：
@@ -234,7 +237,7 @@ time.sleep(60)
 
 ```bash
 ssh-keygen -t ed25519
-git remote set-url origin git@github.com:ywx920/osint-system.git
+git remote set-url origin git@github.com:ywx920/local-ai-osint-dashboard.git
 git push
 ```
 
@@ -308,3 +311,6 @@ wx-osint
 # 📌 License
 
 MIT
+
+`fix_osint.sh` 会先校验 Compose 配置，再重建并启动本项目；不会重复插入 YAML，也不会重启宿主机 Docker 服务。
+Dockerfile 的 HTTPS 软件源保留证书校验；各构建目录已排除本地凭据文件。

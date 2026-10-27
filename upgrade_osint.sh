@@ -217,6 +217,51 @@ a{color:#93c5fd;text-decoration:none}
 <div class="list" id="list"></div>
 
 <script>
+function createNewsItem(x) {
+    const text = (tag, value, className) => {
+        const node = document.createElement(tag);
+        node.textContent = String(value ?? '');
+        if (className) node.className = className;
+        return node;
+    };
+    const item = document.createElement('div');
+    const risk = x.risk_level === '高' ? 'high' : (x.risk_level === '中' ? 'mid' : 'low');
+    item.className = 'item ' + risk;
+    const heading = document.createElement('h3');
+    let url = null;
+    try {
+        const parsed = new URL(String(x.link ?? ''));
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') url = parsed.href;
+    } catch (_) {}
+    const title = text(url ? 'a' : 'span', x.title);
+    if (url) {
+        title.href = url;
+        title.target = '_blank';
+        title.rel = 'noopener noreferrer';
+    }
+    heading.appendChild(title);
+    item.appendChild(heading);
+    const meta = text('div', '来源：' + String(x.source ?? '') + ' ｜ 时间：' + String(x.time ?? '') + ' ｜ ', 'meta');
+    meta.appendChild(text('span', '分类：' + String(x.category ?? '') + ' ｜ ', 'cat'));
+    meta.appendChild(text('span', '情报分：' + String(x.score ?? ''), 'score'));
+    if (x.risk_level != null) meta.appendChild(text('span', ' ｜ 风险：' + String(x.risk_level), 'risk-' + risk));
+    item.appendChild(meta);
+    item.appendChild(text('div', x.summary, 'summary'));
+    if (x.ai_summary != null) {
+        const ai = document.createElement('div');
+        ai.className = 'ai-box';
+        for (const [label, field] of [['摘要', 'ai_summary'], ['影响', 'ai_impact'], ['建议', 'ai_action']]) {
+            if (x[field] == null && field !== 'ai_summary') continue;
+            const row = document.createElement('div');
+            row.className = 'ai-row';
+            row.appendChild(text('span', label, 'ai-label'));
+            row.appendChild(text('span', x[field] || '暂无'));
+            ai.appendChild(row);
+        }
+        item.appendChild(ai);
+    }
+    return item;
+}
 async function load(){
     const res = await fetch('/api/news');
     const data = await res.json();
@@ -227,23 +272,14 @@ async function load(){
     document.getElementById('high').innerText = data.filter(x => x.score >= 10).length;
 
     const list = document.getElementById('list');
-    list.innerHTML = '';
+    list.replaceChildren();
 
     if(data.length === 0){
         list.innerHTML = '<div class="item">暂无数据：请检查 crawler 和 analyzer 日志。</div>';
         return;
     }
 
-    data.forEach(x=>{
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `
-            <h3><a href="${x.link}" target="_blank">${x.title}</a></h3>
-            <div class="meta">来源：${x.source} ｜ 时间：${x.time} ｜ 分类：<span class="cat">${x.category}</span> ｜ 情报分：<span class="score">${x.score}</span></div>
-            <div class="summary">${x.summary || ''}</div>
-        `;
-        list.appendChild(div);
-    });
+    data.forEach(x => list.appendChild(createNewsItem(x)));
 }
 setInterval(load, 5000);
 load();

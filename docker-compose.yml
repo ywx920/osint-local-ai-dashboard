@@ -3,7 +3,7 @@ services:
     image: redis:7
     restart: always
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   postgres:
     image: postgres:16
@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in environment or .env}
       POSTGRES_DB: osintdb
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -24,7 +24,7 @@ services:
     
     restart: always
     ports:
-      - "7000:7000"
+      - "${OSINT_BIND_ADDRESS:-127.0.0.1}:7000:7000"
     environment:
       PG_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in environment or .env}
     depends_on:
